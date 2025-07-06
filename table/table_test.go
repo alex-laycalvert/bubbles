@@ -310,7 +310,9 @@ func TestTableAlignment(t *testing.T) {
 func TestTableAlignmentWithStyleFunc(t *testing.T) {
 	t.Run("No border", func(t *testing.T) {
 		styleFunc := func(row, col int, value string) lipgloss.Style {
-			return lipgloss.NewStyle()
+			return lipgloss.NewStyle().
+				Foreground(lipgloss.Color("red")).
+				Background(lipgloss.Color("red"))
 		}
 
 		biscuits := New(
@@ -333,6 +335,8 @@ func TestTableAlignmentWithStyleFunc(t *testing.T) {
 	t.Run("No border custom padding", func(t *testing.T) {
 		styleFunc := func(row, col int, value string) lipgloss.Style {
 			return lipgloss.NewStyle().
+				Foreground(lipgloss.Color("red")).
+				Background(lipgloss.Color("red")).
 				PaddingLeft(3)
 		}
 
@@ -355,7 +359,9 @@ func TestTableAlignmentWithStyleFunc(t *testing.T) {
 	})
 	t.Run("With border", func(t *testing.T) {
 		styleFunc := func(row, col int, value string) lipgloss.Style {
-			return lipgloss.NewStyle()
+			return lipgloss.NewStyle().
+				Foreground(lipgloss.Color("red")).
+				Background(lipgloss.Color("red"))
 		}
 
 		baseStyle := lipgloss.NewStyle().
@@ -390,6 +396,8 @@ func TestTableAlignmentWithStyleFunc(t *testing.T) {
 	t.Run("With border custom padding", func(t *testing.T) {
 		styleFunc := func(row, col int, value string) lipgloss.Style {
 			return lipgloss.NewStyle().
+				Foreground(lipgloss.Color("red")).
+				Background(lipgloss.Color("red")).
 				PaddingLeft(2)
 		}
 
