@@ -307,6 +307,123 @@ func TestTableAlignment(t *testing.T) {
 	})
 }
 
+func TestTableAlignmentWithStyleFunc(t *testing.T) {
+	t.Run("No border", func(t *testing.T) {
+		styleFunc := func(row, col int, value string) lipgloss.Style {
+			return lipgloss.NewStyle()
+		}
+
+		biscuits := New(
+			WithStyleFunc(styleFunc),
+			WithHeight(5),
+			WithColumns([]Column{
+				{Title: "Name", Width: 25},
+				{Title: "Country of Origin", Width: 16},
+				{Title: "Dunk-able", Width: 12},
+			}),
+			WithRows([]Row{
+				{"Chocolate Digestives", "UK", "Yes"},
+				{"Tim Tams", "Australia", "No"},
+				{"Hobnobs", "UK", "Yes"},
+			}),
+		)
+		got := ansi.Strip(biscuits.View())
+		golden.RequireEqual(t, []byte(got))
+	})
+	t.Run("No border custom padding", func(t *testing.T) {
+		styleFunc := func(row, col int, value string) lipgloss.Style {
+			return lipgloss.NewStyle().
+				PaddingLeft(3)
+		}
+
+		biscuits := New(
+			WithStyleFunc(styleFunc),
+			WithHeight(5),
+			WithColumns([]Column{
+				{Title: "Name", Width: 25},
+				{Title: "Country of Origin", Width: 16},
+				{Title: "Dunk-able", Width: 12},
+			}),
+			WithRows([]Row{
+				{"Chocolate Digestives", "UK", "Yes"},
+				{"Tim Tams", "Australia", "No"},
+				{"Hobnobs", "UK", "Yes"},
+			}),
+		)
+		got := ansi.Strip(biscuits.View())
+		golden.RequireEqual(t, []byte(got))
+	})
+	t.Run("With border", func(t *testing.T) {
+		styleFunc := func(row, col int, value string) lipgloss.Style {
+			return lipgloss.NewStyle()
+		}
+
+		baseStyle := lipgloss.NewStyle().
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240"))
+
+		s := DefaultStyles()
+		s.Header = s.Header.
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240")).
+			BorderBottom(true).
+			Bold(false)
+
+		biscuits := New(
+			WithStyleFunc(styleFunc),
+			WithHeight(5),
+			WithColumns([]Column{
+				{Title: "Name", Width: 25},
+				{Title: "Country of Origin", Width: 16},
+				{Title: "Dunk-able", Width: 12},
+			}),
+			WithRows([]Row{
+				{"Chocolate Digestives", "UK", "Yes"},
+				{"Tim Tams", "Australia", "No"},
+				{"Hobnobs", "UK", "Yes"},
+			}),
+			WithStyles(s),
+		)
+		got := ansi.Strip(baseStyle.Render(biscuits.View()))
+		golden.RequireEqual(t, []byte(got))
+	})
+	t.Run("With border custom padding", func(t *testing.T) {
+		styleFunc := func(row, col int, value string) lipgloss.Style {
+			return lipgloss.NewStyle().
+				PaddingLeft(2)
+		}
+
+		baseStyle := lipgloss.NewStyle().
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240"))
+
+		s := DefaultStyles()
+		s.Header = s.Header.
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("240")).
+			BorderBottom(true).
+			Bold(false)
+
+		biscuits := New(
+			WithStyleFunc(styleFunc),
+			WithHeight(5),
+			WithColumns([]Column{
+				{Title: "Name", Width: 25},
+				{Title: "Country of Origin", Width: 16},
+				{Title: "Dunk-able", Width: 12},
+			}),
+			WithRows([]Row{
+				{"Chocolate Digestives", "UK", "Yes"},
+				{"Tim Tams", "Australia", "No"},
+				{"Hobnobs", "UK", "Yes"},
+			}),
+			WithStyles(s),
+		)
+		got := ansi.Strip(baseStyle.Render(biscuits.View()))
+		golden.RequireEqual(t, []byte(got))
+	})
+}
+
 func TestCursorNavigation(t *testing.T) {
 	tests := map[string]struct {
 		rows   []Row

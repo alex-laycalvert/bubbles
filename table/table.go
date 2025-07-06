@@ -18,11 +18,12 @@ type Model struct {
 	KeyMap KeyMap
 	Help   help.Model
 
-	cols   []Column
-	rows   []Row
-	cursor int
-	focus  bool
-	styles Styles
+	cols      []Column
+	rows      []Row
+	cursor    int
+	focus     bool
+	styles    Styles
+	styleFunc StyleFunc
 
 	viewport viewport.Model
 	start    int
@@ -37,6 +38,9 @@ type Column struct {
 	Title string
 	Width int
 }
+
+// StyleFunc is a function that can be used to customize the style of a table cell based on the row and column index.
+type StyleFunc func(row, col int, value string) lipgloss.Style
 
 // KeyMap defines keybindings. It satisfies to the help.KeyMap interface, which
 // is used to render the help menu.
@@ -190,6 +194,13 @@ func WithFocused(f bool) Option {
 func WithStyles(s Styles) Option {
 	return func(m *Model) {
 		m.styles = s
+	}
+}
+
+// WithStyleFunc sets the table style func which can determine a cell style per column, row, and selected state.
+func WithStyleFunc(f StyleFunc) Option {
+	return func(m *Model) {
+		m.styleFunc = f
 	}
 }
 
@@ -432,7 +443,16 @@ func (m *Model) renderRow(r int) string {
 			continue
 		}
 		style := lipgloss.NewStyle().Width(m.cols[i].Width).MaxWidth(m.cols[i].Width).Inline(true)
-		renderedCell := m.styles.Cell.Render(style.Render(runewidth.Truncate(value, m.cols[i].Width, "…")))
+
+		cellStyle := m.styles.Cell
+		if m.styleFunc != nil {
+			cellStyle = m.styleFunc(r, i, value).Inherit(cellStyle)
+			if r == m.cursor {
+				cellStyle = cellStyle.Inherit(m.styles.Selected)
+			}
+		}
+
+		renderedCell := cellStyle.Render(style.Render(runewidth.Truncate(value, m.cols[i].Width, "…")))
 		s = append(s, renderedCell)
 	}
 
